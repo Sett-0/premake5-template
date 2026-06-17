@@ -3,7 +3,7 @@ projectName   = "projectName"
 
 workspace (workplaceName)
 	configurations { "Debug", "Release" }
-	platforms { "x64" }
+	architecture (os.hostarch())
 	location "../"
     targetdir "../bin/%{cfg.buildcfg}"
 	
@@ -25,7 +25,7 @@ project (projectName)
 	-- libdirs { "../lib" }
 	-- links { "raylib", "gdi32", "winmm" }
 
--- Creating 'make run' command
+-- Creating 'make run' command and fixing bash pathing issue
 local wks_gen = premake.modules.gmake.generate_workspace
 premake.modules.gmake.generate_workspace = function(wks)
 	-- Do make as usual
@@ -34,4 +34,7 @@ premake.modules.gmake.generate_workspace = function(wks)
 	-- Add run command 
     premake.w("\nrun: all")
     premake.w("@bin/$(if $(findstring release,$(config)),Release,Debug)/" .. projectName .. ".exe")
+	
+	-- Adding double quotes to $(MAKE) to stop bash from breaking if make filepath contains spaces
+    premake.w("\nMAKE := \"$(MAKE)\"")
 end
